@@ -1,5 +1,6 @@
 import { Mail } from "lucide-react";
 import { supabase } from "./supabase";
+import { useMsal } from "@azure/msal-react";
 
 const GoogleLogo = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -71,7 +72,7 @@ const socialProviders = [
     border: "",
   },
   {
-    name: "Azure",
+    name: "Microsoft",
     icon: MicrosoftLogo,
     bgColor: "bg-white hover:bg-gray-50",
     textColor: "text-gray-700",
@@ -84,7 +85,7 @@ const socialProviders = [
     textColor: "text-white",
     border: "",
   },
-]
+];
 
 async function loginWithProvider(name: any) {
   const provider = name.toLowerCase();
@@ -100,6 +101,20 @@ async function loginWithProvider(name: any) {
 }
 
 export default function SBLoginPage() {
+  const { instance, accounts } = useMsal();
+
+  const loginRequest = {
+    scopes: ["openid", "profile", "email"],
+  };
+
+  const loginWithMicrosoft = () => {
+    instance.loginRedirect(loginRequest);
+  };
+
+  const user = accounts[0];
+
+  console.log(user?.username);
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-slate-50 to-slate-100 p-4">
       <div className="w-full max-w-md">
@@ -119,7 +134,11 @@ export default function SBLoginPage() {
               const Icon = provider.icon;
               return (
                 <button
-                  onClick={() => loginWithProvider(provider.name)}
+                  onClick={
+                    provider.name == "Microsoft"
+                      ? loginWithMicrosoft
+                      : () => loginWithProvider(provider.name)
+                  }
                   key={provider.name}
                   className={`flex w-full items-center justify-center gap-3 rounded-lg px-4 py-3 font-medium transition-all duration-200 ${provider.bgColor} ${provider.textColor} ${provider.border} shadow-sm hover:shadow-md`}
                 >
